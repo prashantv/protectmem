@@ -27,7 +27,7 @@ func AllocateSlice(slicePtr interface{}, capacity int) *Allocation {
 		panic("AllocateSlice: slicePtr must be a pointer to a slice")
 	}
 
-	size := reflect.ArrayOf(capacity, sliceType.Elem()).Size()
+	size := sliceType.Size() * uintptr(capacity)
 	alloc := Allocate(size)
 
 	// The slicePtr is actually two words: typeTable, sliceHeaderPtr

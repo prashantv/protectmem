@@ -25,5 +25,5 @@ func main() {
 
 	// Expect a crash now
 	fmt.Println("crash", 28)
-	_ = s.F1
+	fmt.Println(s.F1)
 }

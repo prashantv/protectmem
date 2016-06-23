@@ -88,7 +88,7 @@ func TestProtectFail(t *testing.T) {
 }
 
 func TestProtectSegmentationFaults(t *testing.T) {
-	const failDir = "./fail"
+	const failDir = "./testdata/fail"
 	files, err := ioutil.ReadDir(failDir)
 	require.NoError(t, err, "ReadDir failed")
 

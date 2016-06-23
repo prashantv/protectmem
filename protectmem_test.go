@@ -1,10 +1,15 @@
 package protectmem
 
 import (
+	"io/ioutil"
+	"os/exec"
+	"path/filepath"
+	"strings"
 	"testing"
 	"unsafe"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type S struct {
@@ -80,4 +85,44 @@ func TestProtectFail(t *testing.T) {
 	assert.Panics(t, func() {
 		alloc.Protect(10000)
 	})
+}
+
+func TestProtectSegmentationFaults(t *testing.T) {
+	const failDir = "./fail"
+	files, err := ioutil.ReadDir(failDir)
+	require.NoError(t, err, "ReadDir failed")
+
+	for _, f := range files {
+		checkCrash(t, filepath.Join(failDir, f.Name()))
+	}
+}
+
+func checkCrash(t *testing.T, path string) {
+	const crashPrefix = "crash "
+
+	cmd := exec.Command("go", "run", path)
+	out, err := cmd.CombinedOutput()
+
+	// We expect an ExitError since the command should fail.
+	if !assert.IsType(t, &exec.ExitError{}, err, "Expected ExitError") {
+		return
+	}
+
+	// Output should contain a "crash" line
+	lines := strings.Split(string(out), "\n")
+
+	var found string
+	for _, line := range lines {
+		if strings.HasPrefix(line, crashPrefix) {
+			found = line
+		}
+	}
+	if !assert.NotEmpty(t, found, "Failed to find crash line in output: %s", out) {
+		return
+	}
+
+	// Make sure the crash line matches
+	line := strings.TrimPrefix(found, crashPrefix)
+	lookFor := filepath.Base(path) + ":" + line
+	assert.Contains(t, string(out), lookFor, "Unexpected panic")
 }

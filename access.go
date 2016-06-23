@@ -1,6 +1,9 @@
 package protectmem
 
-import "syscall"
+import (
+	"fmt"
+	"syscall"
+)
 
 // Access returns the access level for an allocation.
 type Access int
@@ -21,4 +24,19 @@ func (a Access) toSyscallProt() int {
 		prot = prot | syscall.PROT_WRITE
 	}
 	return prot
+}
+
+func (a Access) String() string {
+	switch a {
+	case None:
+		return "none"
+	case Read:
+		return "read"
+	case Write:
+		return "write"
+	case Read | Write:
+		return "read+write"
+	}
+
+	return fmt.Sprintf("Access(%v)", int(a))
 }

@@ -104,7 +104,7 @@ func checkCrash(t *testing.T, path string) {
 	out, err := cmd.CombinedOutput()
 
 	// We expect an ExitError since the command should fail.
-	if !assert.IsType(t, &exec.ExitError{}, err, "Expected ExitError") {
+	if !assert.IsType(t, &exec.ExitError{}, err, "Expected ExitError for %v", path) {
 		return
 	}
 
@@ -117,12 +117,12 @@ func checkCrash(t *testing.T, path string) {
 			found = line
 		}
 	}
-	if !assert.NotEmpty(t, found, "Failed to find crash line in output: %s", out) {
+	if !assert.NotEmpty(t, found, "Failed to find crash line in output for %v: %s", path, out) {
 		return
 	}
 
 	// Make sure the crash line matches
 	line := strings.TrimPrefix(found, crashPrefix)
 	lookFor := filepath.Base(path) + ":" + line
-	assert.Contains(t, string(out), lookFor, "Unexpected panic")
+	assert.Contains(t, string(out), lookFor, "Unexpected panic for %v", path)
 }
